@@ -1,5 +1,6 @@
 name: Daily AI Founder Digest
 
+# 每日抓取 AI 創業家新聞 → Gemini 整理 → Telegram 推播
 on:
   schedule:
     # UTC 00:00 = 台灣時間每天早上 08:00
