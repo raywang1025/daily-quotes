@@ -15,6 +15,17 @@ import config
 logger = logging.getLogger(__name__)
 
 
+def _stars(rating) -> str:
+    """把 1~5 的評分轉成星號；無效值回傳空字串。"""
+    try:
+        n = int(rating)
+    except (TypeError, ValueError):
+        return ""
+    if not 1 <= n <= 5:
+        return ""
+    return "★" * n + "☆" * (5 - n)
+
+
 def format_message(digest: dict) -> str:
     """組成 Telegram HTML 格式的訊息。"""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -36,6 +47,9 @@ def format_message(digest: dict) -> str:
 
             head = f'{i}. <a href="{html.escape(url)}"><b>{title}</b></a>' if url else f"{i}. <b>{title}</b>"
             lines.append(head)
+            stars = _stars(item.get("rating"))
+            if stars:
+                lines.append(f"   {stars}")
             if insight:
                 lines.append(f"   {insight}")
             if takeaway:
