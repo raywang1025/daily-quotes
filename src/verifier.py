@@ -37,9 +37,12 @@ _NEGATION_RE = re.compile(
     re.I,
 )
 
-# 收費訊號：命中任何一個就視為「官網有收費」
+# 收費訊號：命中任何一個就視為「官網有收費」。
+# 注意：光是頁面上出現「$8」不算數（任何文章都可能提到錢），
+# 金額必須帶著訂閱/方案語境才算定價。
 _PRICE_RE = re.compile(
-    r"\$\s?\d|€\s?\d|per month|/month|/mo\b|/year|/yr\b|free trial|paid plan|upgrade to pro|premium plan",
+    r"[\$€]\s?\d+(?:\.\d+)?\s*(?:/|per\s+)(?:mo|month|user|seat|year|yr)"
+    r"|free trial|paid plan|upgrade to pro|premium plan|pro plan|billed (?:monthly|annually|yearly)",
     re.I,
 )
 _PRICE_WORDS = ("pricing", "subscribe now", "checkout", "buy now")
