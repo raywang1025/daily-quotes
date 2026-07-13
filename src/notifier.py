@@ -46,18 +46,23 @@ def format_message(digest: dict) -> str:
             url = item.get("url", "").strip()
 
             head = f'{i}. <a href="{html.escape(url)}"><b>{title}</b></a>' if url else f"{i}. <b>{title}</b>"
-            lines.append(head)
             stars = _stars(item.get("rating"))
             if stars:
-                lines.append(f"   {stars}")
+                head += f"  {stars}"
+            lines.append(head)
+
+            # 詳細內容放進可展開的引用區塊，預設摺疊、點箭頭展開
+            detail_lines = []
             if insight:
-                lines.append(f"   {insight}")
+                detail_lines.append(insight)
             if takeaway:
-                lines.append(f"   💡 {takeaway}")
+                detail_lines.append(f"💡 {takeaway}")
             if barrier:
-                lines.append(f"   🚧 {barrier}")
+                detail_lines.append(f"🚧 {barrier}")
             if source:
-                lines.append(f"   <i>— {source}</i>")
+                detail_lines.append(f"<i>— {source}</i>")
+            if detail_lines:
+                lines.append(f"<blockquote expandable>{chr(10).join(detail_lines)}</blockquote>")
             lines.append("")
 
     return "\n".join(lines).strip()
