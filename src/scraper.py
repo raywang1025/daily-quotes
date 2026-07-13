@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
+_HREF_RE = re.compile(r'href="(https?://[^"]+)"')
 
 _HEADERS = {
     "User-Agent": (
@@ -34,6 +35,8 @@ class Article:
     summary: str = ""
     published: datetime | None = None
     score: int = 0
+    links: list[str] = field(default_factory=list)  # 貼文內文裡的外部連結（可能含產品官網）
+    site_check: str = ""  # verifier 查到的官網收費證據
     _key: str = field(default="", repr=False)
 
     @property
@@ -113,7 +116,10 @@ def fetch_articles() -> list[Article]:
             if published and published.timestamp() < cutoff:
                 continue
 
-            summary = _clean(getattr(entry, "summary", ""))[:500]
+            raw_summary = getattr(entry, "summary", "") or ""
+            # 連結要在清掉 HTML 之前抓出來，之後給 verifier 查產品官網
+            links = list(dict.fromkeys(_HREF_RE.findall(raw_summary)))[:8]
+            summary = _clean(raw_summary)[:500]
 
             solo_hits, ai_hits = _relevance(title, summary)
             # 非一人創業專門來源：沒有任何相關字眼就略過，
@@ -130,6 +136,7 @@ def fetch_articles() -> list[Article]:
                     summary=summary,
                     published=published,
                     score=solo_hits * 2 + ai_hits,
+                    links=links,
                     _key=key,
                 )
             )

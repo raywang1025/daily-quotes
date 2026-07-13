@@ -13,7 +13,7 @@ import os
 import sys
 
 import config
-from src import notifier, summarizer
+from src import notifier, summarizer, verifier
 from src.scraper import Article, fetch_articles
 
 logging.basicConfig(
@@ -59,6 +59,13 @@ def run(dry_run: bool = False) -> int:
     if not fresh:
         logger.info("沒有新的新聞可推播，結束")
         return 0
+
+    # 對排序最前的案例做官網收費查證（只驗前 12 則，控制執行時間）
+    logger.info("查證產品官網收費訊號…")
+    for a in fresh[:12]:
+        a.site_check = verifier.check_pricing(a.links)
+        if a.site_check:
+            logger.info("✓ %s — %s", a.title[:40], a.site_check)
 
     logger.info("用 Gemini 整理摘要…")
     digest = summarizer.summarize(fresh)
