@@ -1,6 +1,8 @@
 # AI 創業家日報 (Daily AI Founder Digest)
 
-每天自動**抓取多個網路平台的 AI / 新創新聞**，用 **Google Gemini** 整理成一份精簡的繁體中文摘要，並**推播到 Telegram**。
+每天自動**抓取多個平台的 AI 創業家新聞**（募資、併購、創辦人動態、商業模式），用 **Google Gemini** 以創業者視角整理成精簡的繁體中文摘要（每則附「對創業者的啟示」），並**推播到 Telegram**。
+
+內容鎖定 **AI 創業家**而非一般 AI 資訊：純模型發布、學術研究、產品評測會被關鍵字過濾與 Gemini 提示詞雙重排除。
 
 排程靠 **GitHub Actions cron**，不需要自己養伺服器。
 
@@ -58,6 +60,7 @@ python -m src.main
 
 ## 客製化
 
-- **改新聞來源**：編輯 `config.py` 的 `NEWS_FEEDS`
+- **改新聞來源**：編輯 `config.py` 的 `NEWS_FEEDS`（`startup_focused: True` 的來源不經關鍵字過濾）
+- **調整過濾嚴格度**：編輯 `config.py` 的 `ENTREPRENEUR_KEYWORDS` / `AI_KEYWORDS`
 - **改推播則數 / 抓取範圍**：`.env` 裡的 `MAX_DIGEST_ITEMS`、`LOOKBACK_HOURS` 等
 - **換推播管道**：在 `src/notifier.py` 新增 `_send_line()` / `_send_email()`，並在 `dispatch()` 掛上

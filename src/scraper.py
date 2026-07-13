@@ -58,9 +58,17 @@ def _parse_time(entry) -> datetime | None:
     return None
 
 
-def _score(title: str, summary: str) -> int:
+def _count_keywords(text: str, keywords: list[str]) -> int:
+    return sum(1 for kw in keywords if re.search(rf"\b{re.escape(kw)}\b", text))
+
+
+def _relevance(title: str, summary: str) -> tuple[int, int]:
+    """回傳 (創業相關命中數, AI 相關命中數)。"""
     text = f"{title} {summary}".lower()
-    return sum(1 for kw in config.PRIORITY_KEYWORDS if kw in text)
+    return (
+        _count_keywords(text, config.ENTREPRENEUR_KEYWORDS),
+        _count_keywords(text, config.AI_KEYWORDS),
+    )
 
 
 def _fetch_feed(url: str) -> feedparser.FeedParserDict | None:
@@ -107,6 +115,12 @@ def fetch_articles() -> list[Article]:
 
             summary = _clean(getattr(entry, "summary", ""))[:500]
 
+            ent_hits, ai_hits = _relevance(title, summary)
+            # 一般 AI 新聞來源：沒有任何創業相關字眼就略過，
+            # 只留「AI 創業家」內容，不推單純的 AI 資訊。
+            if not feed.get("startup_focused") and ent_hits == 0:
+                continue
+
             seen.add(key)
             articles.append(
                 Article(
@@ -115,7 +129,7 @@ def fetch_articles() -> list[Article]:
                     source=feed["name"],
                     summary=summary,
                     published=published,
-                    score=_score(title, summary),
+                    score=ent_hits * 2 + ai_hits,
                     _key=key,
                 )
             )

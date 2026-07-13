@@ -29,6 +29,7 @@ def format_message(digest: dict) -> str:
         for i, item in enumerate(items, 1):
             title = html.escape(item.get("title", "").strip())
             insight = html.escape(item.get("insight", "").strip())
+            takeaway = html.escape(item.get("takeaway", "").strip())
             source = html.escape(item.get("source", "").strip())
             url = item.get("url", "").strip()
 
@@ -36,6 +37,8 @@ def format_message(digest: dict) -> str:
             lines.append(head)
             if insight:
                 lines.append(f"   {insight}")
+            if takeaway:
+                lines.append(f"   💡 {takeaway}")
             if source:
                 lines.append(f"   <i>— {source}</i>")
             lines.append("")
