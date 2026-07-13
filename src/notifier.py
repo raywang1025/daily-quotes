@@ -42,6 +42,7 @@ def format_message(digest: dict) -> str:
             insight = html.escape(item.get("insight", "").strip())
             takeaway = html.escape(item.get("takeaway", "").strip())
             barrier = html.escape(item.get("barrier", "").strip())
+            mvp = html.escape(item.get("mvp", "").strip())
             source = html.escape(item.get("source", "").strip())
             url = item.get("url", "").strip()
 
@@ -59,6 +60,8 @@ def format_message(digest: dict) -> str:
                 detail_lines.append(f"💡 {takeaway}")
             if barrier:
                 detail_lines.append(f"🚧 {barrier}")
+            if mvp:
+                detail_lines.append(f"🌱 {mvp}")
             if source:
                 detail_lines.append(f"<i>— {source}</i>")
             if detail_lines:
