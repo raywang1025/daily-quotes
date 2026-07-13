@@ -63,10 +63,10 @@ def _count_keywords(text: str, keywords: list[str]) -> int:
 
 
 def _relevance(title: str, summary: str) -> tuple[int, int]:
-    """回傳 (創業相關命中數, AI 相關命中數)。"""
+    """回傳 (一人創業相關命中數, AI 相關命中數)。"""
     text = f"{title} {summary}".lower()
     return (
-        _count_keywords(text, config.ENTREPRENEUR_KEYWORDS),
+        _count_keywords(text, config.SOLO_KEYWORDS),
         _count_keywords(text, config.AI_KEYWORDS),
     )
 
@@ -115,10 +115,10 @@ def fetch_articles() -> list[Article]:
 
             summary = _clean(getattr(entry, "summary", ""))[:500]
 
-            ent_hits, ai_hits = _relevance(title, summary)
-            # 一般 AI 新聞來源：沒有任何創業相關字眼就略過，
-            # 只留「AI 創業家」內容，不推單純的 AI 資訊。
-            if not feed.get("startup_focused") and ent_hits == 0:
+            solo_hits, ai_hits = _relevance(title, summary)
+            # 非一人創業專門來源：沒有任何相關字眼就略過，
+            # 只留「一人公司實戰」內容，不推大公司或泛 AI 資訊。
+            if not feed.get("solo_focused") and solo_hits == 0:
                 continue
 
             seen.add(key)
@@ -129,7 +129,7 @@ def fetch_articles() -> list[Article]:
                     source=feed["name"],
                     summary=summary,
                     published=published,
-                    score=ent_hits * 2 + ai_hits,
+                    score=solo_hits * 2 + ai_hits,
                     _key=key,
                 )
             )

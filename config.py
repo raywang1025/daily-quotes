@@ -27,33 +27,41 @@ MAX_ITEMS_PER_FEED = _int("MAX_ITEMS_PER_FEED", 8)
 MAX_DIGEST_ITEMS = _int("MAX_DIGEST_ITEMS", 6)
 LOOKBACK_HOURS = _int("LOOKBACK_HOURS", 36)
 
-# AI 創業家相關新聞來源（RSS，比直接爬 HTML 穩定）。
-# startup_focused=True 的來源本身就是創業內容，不用再靠關鍵字過濾。
+# 一人公司 / 獨立開發者相關內容來源（RSS）。這類實戰案例主要在
+# Hacker News 與 Reddit 的獨立創業社群，而不是 TechCrunch 這種 VC 媒體。
+# solo_focused=True 的來源本身就是一人創業內容，不用再靠關鍵字過濾。
 NEWS_FEEDS = [
-    {"name": "TechCrunch Startups", "url": "https://techcrunch.com/category/startups/feed/", "startup_focused": True},
-    {"name": "TechCrunch Venture", "url": "https://techcrunch.com/category/venture/feed/", "startup_focused": True},
-    {"name": "Crunchbase News", "url": "https://news.crunchbase.com/feed/", "startup_focused": True},
-    {"name": "Y Combinator Blog", "url": "https://www.ycombinator.com/blog/rss", "startup_focused": True},
-    {"name": "a16z", "url": "https://a16z.com/feed/", "startup_focused": True},
-    {"name": "TechCrunch AI", "url": "https://techcrunch.com/category/artificial-intelligence/feed/"},
-    {"name": "VentureBeat AI", "url": "https://venturebeat.com/category/ai/feed/"},
-    {"name": "Hacker News (AI 創業)", "url": "https://hnrss.org/newest?q=founder+OR+funding+OR+%22AI+startup%22&count=25"},
+    {
+        "name": "HN 一人創業",
+        "url": "https://hnrss.org/newest?q=%22solo+founder%22+OR+solopreneur+OR+%22indie+hacker%22+OR+%22one-person%22&count=30",
+        "solo_focused": True,
+    },
+    {
+        "name": "HN 營收實戰",
+        "url": "https://hnrss.org/newest?q=MRR+OR+bootstrapped+OR+%22side+project%22+OR+%22micro+saas%22&count=30",
+        "solo_focused": True,
+    },
+    {"name": "r/indiehackers", "url": "https://www.reddit.com/r/indiehackers/top/.rss?t=day", "solo_focused": True},
+    {"name": "r/SoloFounders", "url": "https://www.reddit.com/r/SoloFounders/top/.rss?t=day", "solo_focused": True},
+    {"name": "r/EntrepreneurRideAlong", "url": "https://www.reddit.com/r/EntrepreneurRideAlong/top/.rss?t=day", "solo_focused": True},
+    {"name": "r/SaaS", "url": "https://www.reddit.com/r/SaaS/top/.rss?t=day"},
+    {"name": "r/SideProject", "url": "https://www.reddit.com/r/SideProject/top/.rss?t=day"},
 ]
 
-# 創業相關關鍵字：非 startup_focused 來源的文章必須命中至少一個才保留，
-# 確保推播的是「AI 創業家」內容，而不是單純的 AI 資訊。
-ENTREPRENEUR_KEYWORDS = [
-    "founder", "co-founder", "startup", "startups", "funding", "raises",
-    "raised", "seed", "series a", "series b", "series c", "venture", "vc",
-    "acquisition", "acquires", "acquired", "ipo", "valuation", "investor",
-    "investors", "accelerator", "y combinator", "unicorn", "exit", "pivot",
-    "bootstrapped", "entrepreneur", "business model", "monetization",
-    "revenue", "pitch", "term sheet",
+# 一人創業相關關鍵字：非 solo_focused 來源的文章必須命中至少一個才保留，
+# 確保推播的是「一人公司怎麼做到」的內容，而不是大公司或 VC 新聞。
+SOLO_KEYWORDS = [
+    "solo founder", "solo", "solopreneur", "one-person", "one person",
+    "single founder", "indie hacker", "indie", "bootstrapped",
+    "bootstrapping", "self-funded", "no employees", "built alone",
+    "side project", "micro saas", "micro-saas", "mrr", "arr", "revenue",
+    "profitable", "passive income", "first customer", "first sale",
+    "launched", "grew", "automation", "no-code",
 ]
 
-# AI 相關關鍵字：用來加分排序，讓「AI 新創」比一般新創排更前面。
+# AI 相關關鍵字：用來加分排序，讓「用 AI 做到」的案例排最前面。
 AI_KEYWORDS = [
     "ai", "artificial intelligence", "llm", "genai", "generative",
-    "machine learning", "openai", "anthropic", "gpt", "claude", "gemini",
-    "agent", "agents", "foundation model",
+    "machine learning", "openai", "anthropic", "chatgpt", "gpt", "claude",
+    "gemini", "agent", "agents", "automation", "wrapper", "prompt",
 ]

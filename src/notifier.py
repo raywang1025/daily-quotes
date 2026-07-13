@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 def format_message(digest: dict) -> str:
     """組成 Telegram HTML 格式的訊息。"""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    headline = html.escape(digest.get("headline", "AI 創業家每日摘要"))
+    headline = html.escape(digest.get("headline", "一人公司 × AI 每日摘要"))
 
-    lines = [f"🤖 <b>AI 創業家日報</b> · {today}", f"<i>{headline}</i>", ""]
+    lines = [f"🤖 <b>一人公司 × AI 日報</b> · {today}", f"<i>{headline}</i>", ""]
 
     items = digest.get("items", [])
     if not items:
@@ -30,6 +30,7 @@ def format_message(digest: dict) -> str:
             title = html.escape(item.get("title", "").strip())
             insight = html.escape(item.get("insight", "").strip())
             takeaway = html.escape(item.get("takeaway", "").strip())
+            barrier = html.escape(item.get("barrier", "").strip())
             source = html.escape(item.get("source", "").strip())
             url = item.get("url", "").strip()
 
@@ -39,6 +40,8 @@ def format_message(digest: dict) -> str:
                 lines.append(f"   {insight}")
             if takeaway:
                 lines.append(f"   💡 {takeaway}")
+            if barrier:
+                lines.append(f"   🚧 {barrier}")
             if source:
                 lines.append(f"   <i>— {source}</i>")
             lines.append("")

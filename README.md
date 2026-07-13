@@ -1,8 +1,12 @@
-# AI 創業家日報 (Daily AI Founder Digest)
+# 一人公司 × AI 日報 (Daily Solo Founder × AI Digest)
 
-每天自動**抓取多個平台的 AI 創業家新聞**（募資、併購、創辦人動態、商業模式），用 **Google Gemini** 以創業者視角整理成精簡的繁體中文摘要（每則附「對創業者的啟示」），並**推播到 Telegram**。
+每天自動從 **Hacker News 與 Reddit 獨立創業社群**抓「一人公司 / 超小團隊用 AI 做出高營收」的實戰案例，用 **Google Gemini** 整理成繁體中文摘要並**推播到 Telegram**。每則案例包含：
 
-內容鎖定 **AI 創業家**而非一般 AI 資訊：純模型發布、學術研究、產品評測會被關鍵字過濾與 Gemini 提示詞雙重排除。
+- **做什麼、怎麼做到**：產品、客群、營收數字、關鍵做法
+- 💡 **啟發**：這個案例可以怎麼借鏡
+- 🚧 **門檻與天花板**：複製需要什麼能力、規模上限與風險在哪
+
+大公司動態、VC 募資新聞、純 AI 模型資訊會被關鍵字過濾與 Gemini 提示詞雙重排除。
 
 排程靠 **GitHub Actions cron**，不需要自己養伺服器。
 
@@ -19,7 +23,7 @@ RSS 新聞來源 ──► scraper（抓取、去重、依相關度排序）
 ```
 
 - `config.py` — 設定與新聞來源清單
-- `src/scraper.py` — 從 RSS 抓 AI/創業家新聞
+- `src/scraper.py` — 從 RSS 抓一人創業 × AI 案例
 - `src/summarizer.py` — 呼叫 Gemini 整理摘要（失敗時退回原始新聞）
 - `src/notifier.py` — 推播（Telegram / console，可擴充 LINE/Email）
 - `src/main.py` — 串起整個流程，含已推播去重快取
@@ -60,7 +64,7 @@ python -m src.main
 
 ## 客製化
 
-- **改新聞來源**：編輯 `config.py` 的 `NEWS_FEEDS`（`startup_focused: True` 的來源不經關鍵字過濾）
-- **調整過濾嚴格度**：編輯 `config.py` 的 `ENTREPRENEUR_KEYWORDS` / `AI_KEYWORDS`
+- **改內容來源**：編輯 `config.py` 的 `NEWS_FEEDS`（`solo_focused: True` 的來源不經關鍵字過濾）
+- **調整過濾嚴格度**：編輯 `config.py` 的 `SOLO_KEYWORDS` / `AI_KEYWORDS`
 - **改推播則數 / 抓取範圍**：`.env` 裡的 `MAX_DIGEST_ITEMS`、`LOOKBACK_HOURS` 等
 - **換推播管道**：在 `src/notifier.py` 新增 `_send_line()` / `_send_email()`，並在 `dispatch()` 掛上

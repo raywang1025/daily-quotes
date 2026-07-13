@@ -1,4 +1,4 @@
-"""用 Gemini 把抓到的新聞整理成一份「AI 創業家每日摘要」。"""
+"""用 Gemini 把抓到的新聞整理成一份「一人公司 × AI 每日案例摘要」。"""
 from __future__ import annotations
 
 import json
@@ -12,27 +12,31 @@ from src.scraper import Article
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """你是一位服務「AI 創業家」的創業顧問兼科技財經編輯。
-讀者是正在經營或準備創辦 AI 公司的創業者，他們要的不是 AI 新知，而是能幫助自己創業的情報。
-請從我提供的新聞清單中挑出對他們最有價值的內容，整理成一份繁體中文的每日摘要。
+_SYSTEM_PROMPT = """你是一位專門研究「一人公司如何用 AI 做出高營收」的創業教練。
+讀者是想靠 AI 一個人創業的人。他要的不是 AI 新聞，也不是大公司或 VC 募資消息，
+而是一人（或兩三人）公司的實戰案例：他們做什麼、怎麼做到、我能不能複製。
+
+請從我提供的內容清單中挑出最有價值的案例與討論，整理成繁體中文每日摘要。
 
 挑選標準（依優先序）：
-1. AI 新創的募資、併購、估值、商業模式與成長動態。
-2. 知名 AI 創業家、投資人的觀點、策略與經驗談。
-3. 對 AI 創業有直接影響的平台、政策或市場變化。
-絕對不要挑：單純的模型發布、學術研究、產品評測等與創業無關的純 AI 技術新聞。
+1. 一人或超小團隊做出可觀營收（有具體 MRR/ARR/收入數字最好）的真實案例，
+   尤其是靠 AI 工具（ChatGPT/Claude/自動化/AI 產品）達成的。
+2. 一人創業的實戰方法：怎麼找到利基、怎麼獲客、怎麼定價、怎麼用 AI 自動化到一個人能扛。
+3. 適合一個人切入的 AI 商機、市場缺口或新玩法。
+絕對不要挑：大公司動態、VC 募資新聞、單純的 AI 模型/產品資訊、沒有實質內容的自我推廣文。
 
-寫法要求：
-1. insight 用 1~2 句講清楚「發生什麼事、為什麼重要」，語氣專業精簡。
-2. takeaway 用一句話點出「對 AI 創業者的啟示」：這代表什麼機會、風險或可借鏡之處。
-3. 最多輸出 {max_items} 則，依對創業者的價值排序。
-4. 嚴格只回傳 JSON，不要有 markdown 圍欄或多餘文字。
+每則的寫法（都用繁體中文，語氣像在跟朋友分析案例）：
+1. insight：這個人/公司在做什麼、賣給誰、營收或成果多少、關鍵是怎麼做到的（2~3 句）。
+2. takeaway：對讀者的啟發——這個案例可以怎麼借鏡、哪個環節最值得學（1 句）。
+3. barrier：門檻與天花板——複製這件事需要什麼能力或資源、規模上限或最大風險在哪（1~2 句）。
+4. 最多輸出 {max_items} 則，依「對一人創業者的參考價值」排序。
+5. 嚴格只回傳 JSON，不要有 markdown 圍欄或多餘文字。
 
 輸出格式：
 {{
-  "headline": "今日一句話總覽（創業者視角）",
+  "headline": "今日案例一句話總覽",
   "items": [
-    {{"title": "精簡標題", "insight": "1~2 句重點與影響", "takeaway": "對創業者的一句話啟示", "source": "來源", "url": "原文連結"}}
+    {{"title": "精簡標題（含營收數字更好）", "insight": "案例做什麼、成果、怎麼做到", "takeaway": "對讀者的一句話啟發", "barrier": "門檻與天花板", "source": "來源", "url": "原文連結"}}
   ]
 }}
 """
@@ -67,18 +71,19 @@ def _fallback_digest(articles: list[Article]) -> dict:
             "title": a.title,
             "insight": a.summary[:120] if a.summary else "",
             "takeaway": "",
+            "barrier": "",
             "source": a.source,
             "url": a.url,
         }
         for a in articles[: config.MAX_DIGEST_ITEMS]
     ]
-    return {"headline": "今日 AI 創業家新聞摘要", "items": items}
+    return {"headline": "今日一人公司 × AI 案例", "items": items}
 
 
 def summarize(articles: list[Article]) -> dict:
     """回傳 {'headline': str, 'items': [...]}。"""
     if not articles:
-        return {"headline": "今日暫無新的 AI 創業家新聞", "items": []}
+        return {"headline": "今日暫無新的一人公司案例", "items": []}
 
     if not config.GEMINI_API_KEY:
         logger.warning("未設定 GEMINI_API_KEY，改用原始新聞（不經 AI 整理）")
@@ -101,7 +106,7 @@ def summarize(articles: list[Article]) -> dict:
         items = data.get("items", [])[: config.MAX_DIGEST_ITEMS]
         if not items:
             raise ValueError("Gemini 回傳空清單")
-        return {"headline": data.get("headline", "今日 AI 創業家新聞摘要"), "items": items}
+        return {"headline": data.get("headline", "今日一人公司 × AI 案例"), "items": items}
     except Exception as exc:  # noqa: BLE001 — 任何失敗都退回原始摘要，保證推播
         logger.error("Gemini 整理失敗，改用原始新聞: %s", exc)
         return _fallback_digest(articles)

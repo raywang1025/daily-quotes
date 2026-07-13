@@ -47,7 +47,7 @@ def _filter_new(articles: list[Article], cache: set[str]) -> list[Article]:
 
 
 def run(dry_run: bool = False) -> int:
-    logger.info("開始抓取 AI 創業家新聞…")
+    logger.info("開始抓取一人公司 × AI 案例…")
     articles = fetch_articles()
     if not articles:
         logger.warning("沒有抓到任何新聞，結束")
@@ -78,7 +78,7 @@ def run(dry_run: bool = False) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="AI 創業家每日新聞推播")
+    parser = argparse.ArgumentParser(description="一人公司 × AI 每日案例推播")
     parser.add_argument("--dry-run", action="store_true", help="只整理不推播")
     args = parser.parse_args()
     sys.exit(run(dry_run=args.dry_run))
