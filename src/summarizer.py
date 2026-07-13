@@ -45,6 +45,14 @@ _SYSTEM_PROMPT = """你是一位專門研究「一人公司如何用 AI 做出�
 """
 
 
+def _rating(item: dict) -> int:
+    """回傳案例評分；缺漏或無效時當 0 分。"""
+    try:
+        return int(item.get("rating", 0))
+    except (TypeError, ValueError):
+        return 0
+
+
 def _build_input(articles: list[Article]) -> str:
     payload = [
         {
@@ -106,10 +114,25 @@ def summarize(articles: list[Article]) -> dict:
             ),
         )
         data = json.loads(_strip_fences(response.text))
-        items = data.get("items", [])[: config.MAX_DIGEST_ITEMS]
+        items = data.get("items", [])
         if not items:
             raise ValueError("Gemini 回傳空清單")
-        return {"headline": data.get("headline", "今日一人公司 × AI 案例"), "items": items}
+
+        if all(_rating(i) == 0 for i in items):
+            # Gemini 沒照格式給評分時不過濾，避免整份被誤砍
+            logger.warning("所有案例都沒有有效評分，跳過星等過濾")
+            kept = items
+        else:
+            kept = [i for i in items if _rating(i) >= config.MIN_RATING]
+        dropped = len(items) - len(kept)
+        if dropped:
+            logger.info("過濾掉 %d 則低於 %d 星的案例", dropped, config.MIN_RATING)
+        if not kept:
+            logger.info("今日沒有達 %d 星的案例，不推播", config.MIN_RATING)
+            return {"headline": f"今日沒有達 {config.MIN_RATING} 星的案例", "items": []}
+
+        kept = kept[: config.MAX_DIGEST_ITEMS]
+        return {"headline": data.get("headline", "今日一人公司 × AI 案例"), "items": kept}
     except Exception as exc:  # noqa: BLE001 — 任何失敗都退回原始摘要，保證推播
         logger.error("Gemini 整理失敗，改用原始新聞: %s", exc)
         return _fallback_digest(articles)

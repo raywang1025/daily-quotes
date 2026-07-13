@@ -27,6 +27,9 @@ MAX_ITEMS_PER_FEED = _int("MAX_ITEMS_PER_FEED", 8)
 MAX_DIGEST_ITEMS = _int("MAX_DIGEST_ITEMS", 6)
 LOOKBACK_HOURS = _int("LOOKBACK_HOURS", 36)
 
+# 只推播評分達此星數的案例（1~5，設 1 等於不過濾）
+MIN_RATING = _int("MIN_RATING", 3)
+
 # 一人公司 / 獨立開發者相關內容來源（RSS）。這類實戰案例主要在
 # Hacker News 與 Reddit 的獨立創業社群，而不是 TechCrunch 這種 VC 媒體。
 # solo_focused=True 的來源本身就是一人創業內容，不用再靠關鍵字過濾。

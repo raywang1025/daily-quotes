@@ -63,6 +63,10 @@ def run(dry_run: bool = False) -> int:
     logger.info("用 Gemini 整理摘要…")
     digest = summarizer.summarize(fresh)
 
+    if not digest.get("items"):
+        logger.info("沒有達標的案例可推播，結束（今日不發訊息）")
+        return 0
+
     if dry_run:
         logger.info("[dry-run] 只印出，不推播")
         print(notifier.format_message(digest))
